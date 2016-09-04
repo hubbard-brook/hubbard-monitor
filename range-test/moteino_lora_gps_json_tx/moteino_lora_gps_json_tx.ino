@@ -181,22 +181,12 @@ void loop()
       return;  // we can fail to parse a sentence in which case we should just wait for another
   }
 
+ 
+  // if millis() or timer wraps around, we'll just reset it
+  if (timer > millis())  timer = millis();
 
-Serial.print("Location: ");
-
-/*
-      Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);
-      Serial.print(", "); 
-      Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);
-   */
-
-      /*
-       Serial.print("Location (in degrees, works with Google Maps): ");
-      Serial.print(GPS.latitudeDegrees, 4);
-      Serial.print(", "); 
-      Serial.println(GPS.longitudeDegrees, 4);
-     */
-
+  // approximately every 2 seconds or so, print out the current stats
+  if (millis() - timer > 2000) { 
 
   // LORA radio
   
@@ -211,25 +201,48 @@ Serial.print("Location: ");
   JsonObject& root = jsonBuffer.createObject();
   root["id"] = DEVID;
   root["millis"] = millis();
-  JsonObject& data = root.createNestedObject("data");
-  data["vbat"] = double_with_n_digits(measuredvbat, 3);
-  data["lat"] = double_with_n_digits(GPS.latitudeDegrees,6);
-  data["lon"] = double_with_n_digits(GPS.longitudeDegrees,6);
+
+
+timer = millis(); // reset the timer
+
 /*
-  data["s_a_t"] = double_with_n_digits(s_a_t, 2);
-  s_a_h
-  
-  s_b_t
-  s_b_h
-  
-  s_c_t
-  s_c_h
-  
-  t_1
-
-  t_1
-
+Serial.print(GPS.hour, DEC); Serial.print(':');
+    Serial.print(GPS.minute, DEC); Serial.print(':');
+    Serial.print(GPS.seconds, DEC); Serial.print('.');
+    Serial.println(GPS.milliseconds);
+    Serial.print("Date: ");
+    Serial.print(GPS.day, DEC); Serial.print('/');
+    Serial.print(GPS.month, DEC); Serial.print("/20");
+    Serial.println(GPS.year, DEC);
 */
+
+int year = GPS.year;
+int month = GPS.month;
+int day = GPS.day;
+
+int hour = GPS.hour;
+//Serial.println(a);
+int minute = GPS.minute;
+int second = GPS.seconds;
+
+
+  JsonObject& date = root.createNestedObject("date");
+
+ // root["date"]=theDate;
+  //root["time"]=theTime;
+  date["y"]=year;
+  date["mon"]=month;
+  date["d"]=day;
+  date["h"]=hour;
+  date["min"]=minute;
+  date["s"]=second;
+
+  
+  JsonObject& loc = root.createNestedObject("loc");
+  //data["vbat"] = double_with_n_digits(measuredvbat, 3);
+  loc["lat"] = double_with_n_digits(GPS.latitudeDegrees,6);
+  loc["lon"] = double_with_n_digits(GPS.longitudeDegrees,6);
+
   char buf[251];
   root.printTo(buf, sizeof(buf));
   buf[sizeof(buf)-1] = 0;
@@ -273,12 +286,12 @@ Serial.print("Location: ");
     
   //delay(8000);
   
-  delay(2000);
+ // delay(3000);
 
   /*
   for (int i=0;i<sleep_8_loops;i++) {
   LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  
   }
   */
-  
+  }
 }

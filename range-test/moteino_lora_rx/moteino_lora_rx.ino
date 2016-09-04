@@ -78,26 +78,20 @@ void loop()
       
       //RH_RF95::printBuffer("Received: ", buf, len);   
 
-      //Serial.print("RSSI: ");
-     // Serial.print(rf95.lastRssi(), DEC);
+      Serial.print("\{\"RSSI\":");
       
-      //Serial.print('\t'); // TSV
+     Serial.print(rf95.lastRssi(), DEC);
       
-      Serial.println((char*)buf);
-     
+      Serial.print(", \"packet\":"); // CSV
+      
+      Serial.print((char*)buf);
+
+     Serial.println("\}");
 
       digitalWrite(LED,HIGH);
     delay(200);
     digitalWrite(LED, LOW);
 
-      /*
-      // Send a reply
-      uint8_t data[] = "And hello back to you";
-      rf95.send(data, sizeof(data));
-      rf95.waitPacketSent();
-      Serial.println("Sent a reply");
-      digitalWrite(LED, LOW);
-      */
     }
     else
     {
